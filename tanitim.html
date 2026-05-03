@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijital Farkındalık ve Kriz Yönetimi | Giresun Üniversitesi</title>
+    
+    <!-- PWA Altyapısı ve Manifest -->
+    <meta name="theme-color" content="#94ad9a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Dijital%20Fark%C4%B1ndal%C4%B1k%22%2C%22short_name%22%3A%22Fark%C4%B1ndal%C4%B1k%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%2394ad9a%22%7D">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --pastel-green: #94ad9a; 
+            --soft-gray: #4a5568;    
+            --black-pure: #000000;
+            --bg-pure: #ffffff;
+            --text-muted: #64748b;
+            --nav-bg: rgba(255, 255, 255, 0.98);
+        }
+
+        body.dark-mode {
+            --bg-pure: #0f172a; 
+            --black-pure: #f8fafc;
+            --soft-gray: #e2e8f0;
+            --text-muted: #94a3b8;
+            --nav-bg: rgba(15, 23, 42, 0.95);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--bg-pure);
+            color: var(--soft-gray);
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* --- NAVIGASYON --- */
+        nav {
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(148, 173, 154, 0.1);
+            flex-wrap: wrap; 
+        }
+
+        .logo { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; color: var(--black-pure); }
+        .logo span { color: var(--pastel-green); margin-left: 12px; }
+
+        .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center;}
+        .nav-links a {
+            text-decoration: none;
+            color: var(--black-pure);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { background: rgba(148, 173, 154, 0.1); color: var(--pastel-green); }
+        
+        .btn-crisis { background: #ef4444 !important; color: white !important; border-radius: 20px !important; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .btn-crisis:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5); }
+
+        /* --- SAYFA GEÇİŞLERİ --- */
+        .page-content { display: none; padding: 60px 8%; max-width: 1600px; margin: 0 auto; }
+        .page-content.active { display: block; animation: fadeIn 0.5s ease-out forwards; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ANA SAYFA --- */
+        .hero { display: flex; flex-direction: column; align-items: center; margin-bottom: 80px; text-align: center; }
+        .hero-img-container { width: 100%; max-width: 1200px; height: 500px; border-radius: 40px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.06); margin-bottom: 60px; }
+        .hero-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-text { max-width: 800px; }
+        .hero-text h1 { font-family: 'Plus Jakarta Sans'; font-size: 4rem; font-weight: 800; color: var(--black-pure); line-height: 1.1; margin-bottom: 20px; }
+        .hero-text h1 span { color: var(--pastel-green); }
+
+        .stats-bar { width: 100%; max-width: 1200px; margin: 0 auto 100px; background: rgba(148, 173, 154, 0.05); padding: 50px; border-radius: 40px; display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 30px;}
+        .stat-item h2 { font-size: 2.5rem; font-weight: 800; color: var(--pastel-green); margin: 0; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-bottom: 100px; }
+        .feature-card { background: var(--bg-pure); padding: 50px; border-radius: 35px; border: 1px solid rgba(148, 173, 154, 0.15); transition: 0.5s; box-shadow: 0 20px 40px rgba(0,0,0,0.03); }
+        .feature-card h3 { color: var(--black-pure); font-family: 'Plus Jakarta Sans'; font-size: 1.7rem; font-weight: 800; border-left: 5px solid var(--pastel-green); padding-left: 20px; margin-bottom: 20px; }
+
+        .quote-section { text-align: center; padding: 120px 5%; margin: 100px 0; background-color: #000000; border-radius: 40px; position: relative; overflow: hidden; }
+        #dynamic-quote { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 3.5rem; font-weight: 800; color: #ffffff; line-height: 1.1; letter-spacing: -2px; position: relative; z-index: 2; transition: 0.8s ease; }
+        #dynamic-quote span { color: var(--pastel-green); }
+        .quote-label { font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 6px; color: var(--pastel-green); margin-top: 25px; opacity: 0.8; }
+
+        /* --- EĞİTİM (OYUN) --- */
+        .edu-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 50px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+        .step-card { background-color: transparent; height: 400px; perspective: 1000px; cursor: pointer; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s ease; transform-style: preserve-3d; }
+        .step-card.flipped .card-inner, .step-card.matched .card-inner { transform: rotateY(180deg); }
+        .step-card.matched { cursor: default; opacity: 0.6; pointer-events: none; }
+        .step-card.matched .card-front, .step-card.matched .card-back { border-color: #4CAF50; }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; border: 2px solid var(--pastel-green); }
+        .card-front { background: #000; color: #fff; }
+        .card-back { background: var(--bg-pure); color: var(--black-pure); transform: rotateY(180deg); }
+        .step-num { font-size: 0.8rem; font-weight: 800; color: var(--pastel-green); letter-spacing: 4px; margin-bottom: 20px; z-index: 1; }
+        .card-icon { font-size: 4rem; margin-bottom: 20px; }
+        .card-front .game-question-mark { font-size: 5rem; color: rgba(148, 173, 154, 0.2); position: absolute; z-index: 0; }
+
+        /* --- MAKALELER --- */
+        .articles-header { text-align: center; margin-bottom: 80px; }
+        .articles-header h2 { font-family: 'Plus Jakarta Sans'; font-size: 3.5rem; font-weight: 800; color: var(--black-pure); }
+        .articles-header h2 span { color: var(--pastel-green); }
+        .article-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; max-width: 1400px; margin: 0 auto; }
+        .article-item { background: var(--bg-pure); border-radius: 30px; border: 1px solid rgba(148, 173, 154, 0.15); cursor: pointer; transition: 0.4s ease; overflow: hidden; position: relative; height: 350px; }
+        .article-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.25; transition: 0.5s; z-index: 1; }
+        .article-text { position: relative; z-index: 2; padding: 40px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+        .article-item:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .article-item:hover .article-img { opacity: 0.6; transform: scale(1.05); }
+        
+        .reader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-pure); z-index: 10001; display: none; overflow-y: auto; padding: 80px 5%; }
+        .reader-content { max-width: 750px; margin: 0 auto; line-height: 1.8; font-size: 1.15rem; color: var(--soft-gray); text-align: justify; padding-bottom: 100px; }
+        .close-reader { position: fixed; top: 30px; right: 40px; cursor: pointer; font-weight: 800; color: var(--pastel-green); font-size: 1.2rem; background: rgba(148, 173, 154, 0.1); padding: 10px 20px; border-radius: 20px; z-index: 10002; }
+
+        /* --- ÜRÜN & FORMLAR --- */
+        .product-container { display: flex; flex-wrap: wrap; gap: 60px; max-width: 1200px; margin: 0 auto 100px; align-items: center; justify-content: space-between;}
+        .product-text { flex: 1; min-width: 300px; }
+        .product-text h2 { font-family: 'Plus Jakarta Sans'; font-size: 3.5rem; color: var(--black-pure); margin-bottom: 20px; line-height: 1.1; }
+        .mockup-container { flex: 1; display: flex; justify-content: center; min-width: 300px; width: 100%;}
+        .mac-mockup { width: 100%; max-width: 550px; height: 320px; border: 2px solid var(--soft-gray); border-radius: 12px; position: relative; background: var(--bg-pure); overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+        .mac-header { width: 100%; height: 35px; background: rgba(148, 173, 154, 0.2); display: flex; align-items: center; padding: 0 15px; gap: 8px; border-bottom: 1px solid rgba(148, 173, 154, 0.3);}
+        .mac-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+        .mac-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--pastel-green); color: white; text-align: center; padding: 20px; }
+        
+        .feedback-form { max-width: 600px; margin: 0 auto; background: var(--bg-pure); padding: 40px; border-radius: 30px; border: 1px solid rgba(148, 173, 154, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.04);}
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+        .form-group label { font-weight: 700; color: var(--black-pure); margin-bottom: 8px; font-size: 0.9rem; }
+        .form-group input, .form-group textarea { padding: 15px; border-radius: 10px; border: 1px solid var(--soft-gray); background: transparent; color: var(--soft-gray); font-family: 'Inter'; font-size: 1rem; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--pastel-green); }
+        .error-text { color: #ef4444; font-size: 0.8rem; margin-top: 5px; display: none; font-weight: 600; }
+        .submit-btn { background: var(--black-pure); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; }
+        .submit-btn:hover { background: var(--pastel-green); }
+
+        /* --- DETOKS --- */
+        .timer-container { text-align: center; max-width: 600px; margin: 20px auto 50px; background: var(--bg-pure); padding: 50px; border-radius: 40px; border: 2px solid rgba(148, 173, 154, 0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 20px 40px rgba(0,0,0,0.05); transition: 0.5s; }
+        .timer-container.running { border-color: var(--pastel-green); box-shadow: 0 20px 50px rgba(148, 173, 154, 0.2); }
+        .detox-setup { width: 100%; transition: 0.3s opacity; }
+        .detox-setup input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid var(--soft-gray); background: transparent; color: var(--black-pure); font-family: 'Inter'; font-size: 1rem; text-align: center; margin-bottom: 20px; }
+        .detox-setup input:focus { outline: none; border-color: var(--pastel-green); }
+        .time-btn-group { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .time-btn { background: transparent; border: 2px solid var(--soft-gray); color: var(--soft-gray); padding: 10px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .time-btn.active, .time-btn:hover { background: var(--pastel-green); border-color: var(--pastel-green); color: white; }
+        .timer-display { font-family: 'Plus Jakarta Sans'; font-size: 6rem; font-weight: 800; color: var(--black-pure); margin-bottom: 20px; font-variant-numeric: tabular-nums; }
+        .timer-controls button { background: var(--soft-gray); color: white; border: none; padding: 15px 30px; margin: 5px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
+        .timer-controls button.primary { background: var(--pastel-green); }
+        .timer-controls button:hover { transform: scale(1.05); }
+        .active-task-text { font-size: 1.2rem; font-weight: 600; color: var(--pastel-green); margin-bottom: 20px; display: none; }
+        .stats-board { background: rgba(148, 173, 154, 0.1); padding: 20px 40px; border-radius: 20px; display: inline-block; font-weight: 700; color: var(--black-pure); margin-top: 20px; border: 1px dashed var(--pastel-green); }
+
+        /* --- ANALİZ & CHART --- */
+        .bar-container { width: 100%; height: 14px; background: rgba(148, 173, 154, 0.1); border-radius: 20px; overflow: hidden; margin: 20px 0; }
+        .range-group { margin-bottom: 10px; }
+        .chart-wrapper { display: flex; justify-content: center; align-items: center; padding: 20px; }
+
+        /* --- BAŞA DÖN BUTONU --- */
+        #scrollTopBtn { display: none; position: fixed; bottom: 30px; right: 30px; z-index: 9999; border: none; outline: none; background-color: var(--pastel-green); color: white; cursor: pointer; padding: 15px; border-radius: 50%; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: 0.3s ease; width: 60px; height: 60px; }
+        #scrollTopBtn:hover { background-color: var(--black-pure); transform: scale(1.1); }
+
+        /* --- KRİZ MODU --- */
+        #crisis-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-pure); z-index: 100000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+        .breath-zone { height: 480px; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+        .breath-circle { width: 250px; height: 250px; border-radius: 50%; background: rgba(148, 173, 154, 0.2); border: 4px solid var(--pastel-green); display: flex; align-items: center; justify-content: center; color: var(--black-pure); font-family: 'Plus Jakarta Sans'; font-size: 1.8rem; font-weight: 800; transition: transform 0.5s ease; margin: 0; }
+        #btn-feel-better { background: var(--black-pure); color: white; border: none; padding: 18px 60px; border-radius: 40px; font-size: 1.2rem; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 0; }
+        #btn-feel-better:hover { background: var(--pastel-green); transform: translateY(-3px); }
+        #cycle-counter { font-family: 'Plus Jakarta Sans'; font-weight: 800; color: var(--pastel-green); font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 20px; }
+
+        /* MOBİL */
+        @media (max-width: 768px) {
+            nav { flex-direction: column; gap: 15px; padding: 15px; }
+            .nav-links { justify-content: center; gap: 8px; }
+            .nav-links a { font-size: 0.7rem; padding: 8px 12px; }
+            .hero-text h1 { font-size: 2.5rem; }
+            .hero-img-container { height: 300px; border-radius: 20px; }
+            .page-content { padding: 40px 5%; }
+            .stats-bar { flex-direction: column; gap: 30px; padding: 30px; border-radius: 20px; }
+            .stat-item h2 { font-size: 2rem; }
+            .articles-header h2 { font-size: 2.5rem; }
+            #dynamic-quote { font-size: 2rem; }
+            .product-container { flex-direction: column; text-align: center; }
+            .product-text h2 { font-size: 2.5rem; }
+            .product-text ul { align-items: center; }
+            .mac-mockup { height: 250px; } 
+            .timer-container { padding: 40px 20px; width: 100%; border-radius: 20px;}
+            .timer-display { font-size: 4rem; }
+            .time-btn-group { flex-direction: column; width: 100%;}
+            .reader-overlay { padding: 60px 5%; }
+            .reader-content h1 { font-size: 1.8rem !important; }
+            .reader-content blockquote { font-size: 1rem !important; padding: 15px !important; }
+            .close-reader { top: 15px; right: 15px; font-size: 1rem; padding: 8px 15px; }
+            .breath-zone { height: 380px; }
+            .breath-circle { width: 180px; height: 180px; font-size: 1.4rem; }
+            #btn-feel-better { padding: 15px 30px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">DİJİTAL<span>FARKINDALIK</span></div>
+    <div class="nav-links">
+        <a onclick="showPage('home')" id="link-home" class="active">Ana Sayfa</a>
+        <a onclick="showPage('product')" id="link-product">Ürün</a>
+        <a onclick="showPage('education')" id="link-education">Eğitim</a>
+        <a onclick="showPage('articles')" id="link-articles">Makaleler</a>
+        <a onclick="showPage('analysis')" id="link-analysis">Analiz</a>
+        <a onclick="showPage('detox')" id="link-detox">Detoks</a>
+        <a onclick="toggleDarkMode()" style="font-size: 1.2rem; cursor: pointer;" title="Karanlık Mod">🌓</a>
+        <a onclick="openCrisisMode()" class="btn-crisis">🚨 Kriz Modu</a>
+    </div>
+</nav>
+
+<!-- KRİZ MODU OVERLAY -->
+<div id="crisis-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-pure); z-index: 100000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+    <h2 style="font-family: 'Plus Jakarta Sans'; font-size: clamp(2rem, 5vw, 3rem); color: var(--black-pure); margin-bottom: 5px;">Sakinleşme Modu</h2>
+    <p style="color: var(--soft-gray); font-size: clamp(1rem, 3vw, 1.2rem); max-width: 500px; margin: 0;">4-7-8 Nefes Tekniği: Zihninizi şimdi sıfırlayın.</p>
+    <div id="cycle-counter" style="font-family: 'Plus Jakarta Sans'; font-weight: 800; color: var(--pastel-green); font-size: 1.5rem; letter-spacing: 4px; margin-top: 15px; margin-bottom: 15px;">DÖNGÜ: 1</div>
+    
+    <div class="breath-zone" style="height: 350px; display: flex; align-items: center; justify-content: center; width: 100%;">
+        <div class="breath-circle" id="breath-circle" style="width: 150px; height: 150px; border-radius: 50%; background: rgba(148, 173, 154, 0.2); border: 4px solid var(--pastel-green); display: flex; align-items: center; justify-content: center; color: var(--black-pure); font-family: 'Plus Jakarta Sans'; font-size: 1.3rem; font-weight: 800; transition: transform 0.5s ease; margin: 0;">Hazır Ol</div>
+    </div>
+    
+    <button id="btn-feel-better" onclick="finishCrisisMode()" style="background: var(--black-pure); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px;">Sakinleştim, İyiyim</button>
+    <h3 id="crisis-success-msg" style="display: none; color: var(--pastel-green); font-family: 'Plus Jakarta Sans'; font-size: 1.8rem; margin-top: 20px;">Kontrol Sizde. ✅</h3>
+</div>
+
+<!-- ANA SAYFA -->
+<div id="home" class="page-content active">
+    <main class="hero">
+        <div class="hero-img-container"><img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1600&auto=format&fit=crop" alt="Doğa ve huzur"></div>
+        <div class="hero-text">
+            <h1>BAĞLANTIDA <span>KAL,</span><br>BİLİNÇLİ YAŞA.</h1>
+            <p>Teknoloji dünyasının hızı ile zihninizin sükuneti arasında denge kurun.</p>
+        </div>
+    </main>
+    <div class="stats-bar">
+        <div class="stat-item"><h2 class="stat-count" data-target="12540">0</h2><p>Kurtarılan Saat</p></div>
+        <div class="stat-item"><h2 class="stat-count" data-target="850">0</h2><p>Aktif Kullanıcı</p></div>
+        <div class="stat-item"><h2 class="stat-count" data-target="4200">0</h2><p>Tamamlanan Detoks</p></div>
+    </div>
+    <section class="features-grid">
+        <div class="feature-card"><h3>Bilişsel Odaklanma</h3><p>Anlık bildirim döngüsünden çıkarak derin çalışma kapasitenizi optimize edin.</p></div>
+        <div class="feature-card"><h3>Algoritmik Farkındalık</h3><p>Sosyal medya algoritmalarının psikolojik etkilerini çözümleyin.</p></div>
+        <div class="feature-card"><h3>Zihinsel Optimizasyon</h3><p>Teknoloji ve biyolojik saat arasındaki dengeyi koruyun.</p></div>
+    </section>
+    <section class="quote-section">
+        <div id="dynamic-quote">Zihin, <span>sessizlikte</span> kendi sesini duyar.</div>
+        <div class="quote-label">— Farkındalık Durağı —</div>
+    </section>
+</div>
+
+<!-- EĞİTİM (OYUN) -->
+<div id="education" class="page-content">
+    <div class="articles-header">
+        <h2>Farkındalık <span>Eşleştirme Oyunu</span></h2>
+        <p>Aynı simgeye sahip iki kartı bulun. Eşleşen her çift, size dijital bir farkındalık ipucu verecektir.</p>
+    </div>
+    <div class="edu-wrapper" id="game-grid"></div>
+</div>
+
+<!-- KART OYUNU BİLGİ PENCERESİ (MODAL) -->
+<div id="game-info-modal" onclick="closeGameModal()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100005; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; cursor: pointer;">
+    <div onclick="event.stopPropagation()" style="background: var(--bg-pure); padding: 40px; border-radius: 30px; border: 2px solid var(--pastel-green); max-width: 600px; text-align: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; max-height: 85vh; overflow-y: auto; cursor: default;">
+        <div onclick="closeGameModal()" style="position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--soft-gray); cursor: pointer; font-weight: bold; line-height: 1;" title="Kapat">&times;</div>
+        
+        <div id="modal-icon" style="font-size: 4rem; margin-bottom: 20px;"></div>
+        <h3 id="modal-title" style="font-family: 'Plus Jakarta Sans'; color: var(--pastel-green); font-size: 1.8rem; margin-top: 0;"></h3>
+        <p id="modal-text" style="color: var(--soft-gray); line-height: 1.8; margin: 20px 0; font-size: 1.05rem; text-align: justify;"></p>
+        <button onclick="closeGameModal()" style="background: var(--pastel-green); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; width: 100%;">ANLADIM, DEVAM ET</button>
+    </div>
+</div>
+
+<!-- ÜRÜN -->
+<div id="product" class="page-content">
+    <div class="articles-header">
+        <h2>Ana Projemiz <span>Çok Yakında</span></h2>
+        <p>Web odaklı dijital farkındalık platformumuzun detayları burada olacak.</p>
+    </div>
+    
+    <div class="product-container">
+        <div class="product-text">
+            <h2>Gelişmiş Web Deneyimi <br><span style="color: var(--pastel-green);">Masaüstünüzde.</span></h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 30px;">Geliştirdiğimiz diğer web projesi ile dijital kriz yönetimi ve sistem analizini doğrudan tarayıcınız üzerinden deneyimleyebileceksiniz. Masaüstü odaklı bu platformun beta sürümüne erken erişim sağlamak için aşağıdaki formu doldurun.</p>
+            <ul style="list-style-type: none; padding: 0; display: flex; flex-direction: column; gap: 15px; font-weight: 500;">
+                <li>✅ Kapsamlı Sistem Analiz Paneli</li>
+                <li>✅ Web Tabanlı Kriz Yönetim Araçları</li>
+                <li>✅ Entegre Motivasyon Ağı</li>
+            </ul>
+        </div>
+        
+        <div class="mockup-container">
+            <div class="mac-mockup">
+                <div class="mac-header">
+                    <div class="mac-dot dot-red"></div>
+                    <div class="mac-dot dot-yellow"></div>
+                    <div class="mac-dot dot-green"></div>
+                </div>
+                <div class="mac-body">
+                    <h3 style="font-family: 'Plus Jakarta Sans'; font-size: 2.2rem; margin: 0; line-height: 1;">DİJİTAL</h3>
+                    <h3 style="font-family: 'Plus Jakarta Sans'; font-size: 1.2rem; margin: 0; color: var(--black-pure); letter-spacing: 2px;">FARKINDALIK WEB</h3>
+                    <div style="margin-top: 25px; padding: 15px 30px; background: rgba(0,0,0,0.2); border-radius: 15px;">
+                        <div style="font-size: 2.5rem;">💻</div>
+                        <p style="font-weight: 700; margin: 5px 0 0 0; font-size: 0.9rem;">Sistem Yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-form" id="contact-form-section">
+        <h3 style="font-family: 'Plus Jakarta Sans'; font-size: 1.8rem; color: var(--black-pure); margin-bottom: 10px; text-align: center;">Erken Erişim Listesine Katıl</h3>
+        <p style="text-align: center; margin-bottom: 30px; font-size: 0.9rem;">veya düşüncelerini bizimle paylaş.</p>
+        
+        <form id="betaForm" novalidate>
+            <div class="form-group">
+                <label for="userName">Adınız Soyadınız</label>
+                <input type="text" id="userName" name="isim" placeholder="Örn: Ahmet Yılmaz">
+                <span class="error-text" id="err-name">Lütfen geçerli bir ad giriniz.</span>
+            </div>
+            <div class="form-group">
+                <label for="userEmail">E-Posta Adresiniz</label>
+                <input type="email" id="userEmail" name="email" placeholder="Örn: ahmet@example.com">
+                <span class="error-text" id="err-email">Lütfen geçerli bir e-posta adresi giriniz.</span>
+            </div>
+            <div class="form-group">
+                <label for="userMsg">Mesajınız (Opsiyonel)</label>
+                <textarea id="userMsg" name="mesaj" rows="4" placeholder="Dijital yorgunlukla nasıl başa çıkıyorsunuz?"></textarea>
+                <span class="error-text" id="err-msg">Mesajınız çok kısa, lütfen en az 10 karakter girin.</span>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtnForm">KAYIT OL</button>
+        </form>
+        
+        <div id="success-msg" style="display:none; text-align: center; color: #4CAF50; font-weight: 800; font-size: 1.2rem; margin-top: 20px;">
+            Sisteme başarıyla kaydedildiniz. Teşekkürler!
+        </div>
+    </div>
+</div>
+
+<!-- MAKALELER -->
+<div id="articles" class="page-content">
+    <div class="articles-header">
+        <h2>Farkındalık <span>Köşesi</span></h2>
+        <p>Günlük hayatın koşuşturmacasında zihnimizi korumak için derin ve etkili okumalar.</p>
+    </div>
+    <div class="article-grid">
+        <div class="article-item" onclick="openReader(1)">
+            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800" class="article-img" alt="Notebook">
+            <div class="article-text">
+                <div><small style="color: var(--pastel-green); font-weight: 800;">ZİHİNSEL YÜK</small><h3 style="font-size: 1.6rem; color: var(--black-pure); margin-top: 10px;">Görünmez Yorgunluk: Açık Kalan Sekmeler</h3></div>
+                <div style="font-weight: 800; color: var(--pastel-green);">OKUMAYA BAŞLA →</div>
+            </div>
+        </div>
+        <div class="article-item" onclick="openReader(2)">
+            <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=800" class="article-img" alt="Code screen">
+            <div class="article-text">
+                <div><small style="color: var(--pastel-green); font-weight: 800;">DİKKAT YÖNETİMİ</small><h3 style="font-size: 1.6rem; color: var(--black-pure); margin-top: 10px;">Sonsuz Kaydırma Tuzağı</h3></div>
+                <div style="font-weight: 800; color: var(--pastel-green);">KEŞFET →</div>
+            </div>
+        </div>
+        <div class="article-item" onclick="openReader(3)">
+            <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=800" class="article-img" alt="Minimalist desk">
+            <div class="article-text">
+                <div><small style="color: var(--pastel-green); font-weight: 800;">SADELEŞME</small><h3 style="font-size: 1.6rem; color: var(--black-pure); margin-top: 10px;">Hayatınızı Sadeleştirin</h3></div>
+                <div style="font-weight: 800; color: var(--pastel-green);">İNCELE →</div>
+            </div>
+        </div>
+        <div class="article-item" onclick="openReader(4)">
+            <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=800" class="article-img" alt="Nature path">
+            <div class="article-text">
+                <div><small style="color: var(--pastel-green); font-weight: 800;">MOLA SANATI</small><h3 style="font-size: 1.6rem; color: var(--black-pure); margin-top: 10px;">Zihinsel Bir "Yeniden Başlat" Neden Gereklidir?</h3></div>
+                <div style="font-weight: 800; color: var(--pastel-green);">GÖZ AT →</div>
+            </div>
+        </div>
+        <div class="article-item" onclick="openReader(5)">
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800" class="article-img" alt="Circuit board">
+            <div class="article-text">
+                <div><small style="color: var(--pastel-green); font-weight: 800;">DİJİTAL SINIRLAR</small><h3 style="font-size: 1.6rem; color: var(--black-pure); margin-top: 10px;">Ne Zaman "Dur" Demeliyiz?</h3></div>
+                <div style="font-weight: 800; color: var(--pastel-green);">DETAYLAR →</div>
+            </div>
+        </div>
+        <div class="article-item" onclick="openReader(6)">
+            <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800" class="article-img" alt="Coffee and notes">
+            <div class="article-text">
+                <div><small style="color: var(--pastel-green); font-weight: 800;">ODAKLANMA</small><h3 style="font-size: 1.6rem; color: var(--black-pure); margin-top: 10px;">Aynı Anda Birçok İş Yapmak Mümkün Mü?</h3></div>
+                <div style="font-weight: 800; color: var(--pastel-green);">OKUMAYA BAŞLA →</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- YENİ EKLENTİ: CHART.JS GRAFİKLİ ANALİZ -->
+<div id="analysis" class="page-content">
+    <div class="articles-header">
+        <h2>Zihinsel Yük <span>Analizi</span></h2>
+        <p>Metrikleri kendi durumunuza göre ayarlayarak mevcut dijital yorgunluğunuzu hesaplayın ve grafikte görün.</p>
+    </div>
+    
+    <!-- Grafikli 3 Sütunlu Grid Yapısı -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Sütun 1: Sürgüler -->
+        <div style="background: var(--bg-pure); padding: 40px; border-radius: 30px; border: 1px solid rgba(148, 173, 154, 0.2); display: flex; flex-direction: column; gap: 30px;">
+            <div class="range-group">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <label style="font-weight: 700; color: var(--black-pure);">Günlük Ekran Süresi</label>
+                    <span id="val-screen" style="color: var(--pastel-green); font-weight: 800;">4 Saat</span>
+                </div>
+                <input type="range" id="input-screen" min="1" max="14" value="4" oninput="calculateLoad()" style="width: 100%; accent-color: var(--pastel-green);">
+            </div>
+            <div class="range-group">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <label style="font-weight: 700; color: var(--black-pure);">Bildirim Yoğunluğu</label>
+                    <span id="val-notif" style="color: var(--pastel-green); font-weight: 800;">Orta</span>
+                </div>
+                <input type="range" id="input-notif" min="0" max="100" value="50" oninput="calculateLoad()" style="width: 100%; accent-color: var(--pastel-green);">
+            </div>
+            <div class="range-group">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <label style="font-weight: 700; color: var(--black-pure);">Uyku Kalitesi</label>
+                    <span id="val-sleep" style="color: var(--pastel-green); font-weight: 800;">Normal</span>
+                </div>
+                <input type="range" id="input-sleep" min="0" max="100" value="50" oninput="calculateLoad()" style="width: 100%; accent-color: var(--pastel-green);">
+            </div>
+        </div>
+        
+        <!-- Sütun 2: Sistem Durumu Özeti -->
+        <div style="background: var(--bg-pure); padding: 40px; border-radius: 30px; border: 1px solid rgba(148, 173, 154, 0.2); text-align: center; display: flex; flex-direction: column; justify-content: center;">
+            <h3 style="color: var(--soft-gray); font-size: 1.2rem; margin-bottom: 20px;">Genel Zihinsel Yük</h3>
+            <div style="font-size: 4rem; font-weight: 800; font-family: 'Plus Jakarta Sans'; color: var(--pastel-green); line-height: 1;" id="final-load-val">45%</div>
+            <div class="bar-container" style="width: 100%; height: 14px; background: rgba(148, 173, 154, 0.1); border-radius: 20px; overflow: hidden; margin: 30px 0;">
+                <div id="final-analysis-fill" style="width: 45%; height: 100%; background: var(--pastel-green); transition: 0.5s ease;"></div>
+            </div>
+            <p id="final-load-text" style="color: var(--soft-gray); line-height: 1.6; font-weight: 500;">Sistem stabil çalışıyor. Mevcut rutinlerinizi koruyun.</p>
+        </div>
+
+        <!-- Sütun 3: Dinamik Chart.js Grafiği -->
+        <div class="chart-wrapper" style="background: var(--bg-pure); padding: 20px; border-radius: 30px; border: 1px solid rgba(148, 173, 154, 0.2);">
+            <canvas id="loadChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- DETOKS -->
+<div id="detox" class="page-content">
+    <div class="articles-header">
+        <h2>Odaklanma <span>Zamanlayıcısı</span></h2>
+        <p>Dünya ile bağınızı kesin. Hedefinizi belirleyin ve derin çalışmaya (Deep Work) geçin.</p>
+    </div>
+    
+    <div class="timer-container" id="timer-ring">
+        <div class="detox-setup" id="detox-setup">
+            <input type="text" id="focus-task" placeholder="Şu an neye odaklanıyorsun? (Örn: Sistem Analizi Çalışması)">
+            <div class="time-btn-group">
+                <button onclick="setTimerDuration(15, this)" class="time-btn">15 Dk (Kısa Mola)</button>
+                <button onclick="setTimerDuration(25, this)" class="time-btn active">25 Dk (Derin Odak)</button>
+                <button onclick="setTimerDuration(50, this)" class="time-btn">50 Dk (Blok Çalışma)</button>
+            </div>
+        </div>
+
+        <div class="active-task-text" id="active-task-display">Hedef: Belirlenmedi</div>
+        <div class="timer-display" id="timer-display">25:00</div>
+        
+        <div class="timer-controls">
+            <button class="primary" id="timer-start-btn" onclick="toggleTimer()">BAŞLAT</button>
+            <button onclick="resetTimer()">SIFIRLA</button>
+        </div>
+    </div>
+
+    <div style="text-align: center;">
+        <div class="stats-board">
+            Bugün Kazanılan Odaklanma Süresi: <span id="total-focus-stats" style="font-size: 1.5rem; color: var(--pastel-green);">0</span> Dakika
+        </div>
+    </div>
+</div>
+
+<div id="reader" class="reader-overlay"><div class="close-reader" onclick="closeReader()">KAPAT ×</div><div id="reader-inner" class="reader-content"></div></div>
+
+<button id="scrollTopBtn" onclick="scrollToTop()" title="Yukarı Çık">↑</button>
+
+<script>
+    /* --- EKSİKSİZ, UZUN VE DETAYLI MAKALELER --- */
+    const makaleler = {
+        1: `
+            <div style="margin-bottom: 40px; text-align: center;">
+                <span style="background: rgba(148, 173, 154, 0.15); color: var(--pastel-green); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px;">ZİHİNSEL YÜK</span>
+                <h1 style="font-family: 'Plus Jakarta Sans'; font-size: 2.5rem; color: var(--black-pure); margin-top: 25px; line-height: 1.2;">Görünmez Yorgunluk: Açık Kalan Sekmeler</h1>
+                <p style="color: var(--pastel-green); font-weight: 600; font-size: 0.95rem;">Dijital Farkındalık Notları</p>
+            </div>
+            <p>Bazen gün içinde fiziksel olarak hiçbir ağır iş yapmasak da, akşam eve geldiğimizde kendimizi koltuğa zor atacak kadar tükenmiş hissederiz. Bunun en büyük nedenlerinden biri modern çağın en yaygın sorunu olan "görünmez yorgunluktur". Nasıl ki bilgisayarımızda veya telefonumuzda arka planda çalışan ve işimiz bittiği halde kapatmadığımız onlarca program cihazı yavaşlatıp şarjını bitiriyorsa, zihnimiz de tam olarak böyle çalışır.</p>
+            <p>Gün içinde maruz kaldığımız her uyaran bir iz bırakır. Yanıtlamayı ertelediğimiz o WhatsApp mesajı, aklımızın bir köşesinde sürekli dönen "şu faturayı ödemeliyim" düşüncesi, sosyal medyada görüp sinirlendiğimiz ama müdahale edemediğimiz bir haber... Tüm bunlar, zihnimizde açık kalan birer sekme gibidir. Psikolojide buna "Zeigarnik Etkisi" denir; yani beynimiz, tamamlanmamış görevleri tamamlananlardan çok daha net hatırlar ve onları çözene kadar arka planda enerji harcamaya devam eder.</p>
+            <blockquote style="border-left: 4px solid var(--pastel-green); font-style: italic; margin: 35px 0; background: rgba(148, 173, 154, 0.05); padding: 25px; border-radius: 0 20px 20px 0; font-size: 1.2rem; color: var(--black-pure);">
+                "Zihnimizi temiz tutmak, en az bedenimizi dinlendirmek kadar önemlidir. Gereksiz düşünceleri tıpkı kullanmadığımız bir uygulamayı kapatır gibi kapatmayı öğrenmeliyiz."
+            </blockquote>
+            <p><strong>Peki bu açık sekmeleri nasıl kapatacağız?</strong></p>
+            <ul style="line-height: 1.8; margin: 20px 0; padding-left: 20px; color: var(--soft-gray);">
+                <li style="margin-bottom: 10px;"><strong>Zihni Kağıda Dökün:</strong> Aklınızda dönen görevleri bir deftere veya telefonunuzun notlar kısmına yazın. Beyniniz, o görevin artık güvenli bir yerde "kayıtlı" olduğunu gördüğünde rahatlar ve o sekmeyi kapatır.</li>
+                <li style="margin-bottom: 10px;"><strong>2 Dakika Kuralı:</strong> Eğer bir mesajı yanıtlamak veya bir işi halletmek 2 dakikadan az sürecekse, onu ertelemeyin, hemen yapın.</li>
+                <li style="margin-bottom: 10px;"><strong>Gereksiz Bildirimleri Susturun:</strong> Size o an değer katmayan alışveriş uygulamalarının, haber sitelerinin bildirimlerini tamamen kapatın. Siz istemeden hiçbir bilgi zihninize zorla girmesin.</li>
+            </ul>
+            <p>Unutmayın, zihninizin de bir bataryası ve işlem gücü var. Onu gerçekten önemli olan şeyler için saklayın.</p>
+        `,
+        2: `
+            <div style="margin-bottom: 40px; text-align: center;">
+                <span style="background: rgba(148, 173, 154, 0.15); color: var(--pastel-green); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px;">DİKKAT YÖNETİMİ</span>
+                <h1 style="font-family: 'Plus Jakarta Sans'; font-size: 2.5rem; color: var(--black-pure); margin-top: 25px; line-height: 1.2;">Sonsuz Kaydırma Tuzağı</h1>
+                <p style="color: var(--pastel-green); font-weight: 600; font-size: 0.95rem;">Dijital Farkındalık Notları</p>
+            </div>
+            <p>Gece uyumadan önce "sadece birkaç dakika bakıp kapatacağım" diyerek telefonu elinize alıp, bir de baktığınızda saatlerin geçtiğini ve kendinizi bambaşka, anlamsız videolar izlerken bulduğunuz oldu mu? Eğer cevabınız evetse, yalnız değilsiniz. Bu sizin iradesizliğiniz veya zayıflığınız değil; sosyal medya uygulamalarının tam olarak bu amaçla, dünyanın en iyi mühendisleri ve psikologları tarafından tasarlanmış olmasındandır. Buna "sonsuz kaydırma" (doomscrolling veya infinite scroll) diyoruz.</p>
+            <p>Eskiden televizyon izlerken bir program bittiğinde jenerik akar, ekran kararır ve bize "başka bir şeye geçme veya televizyonu kapatma" fırsatı sunulurdu. Ancak modern sosyal medya algoritmaları, bize hiçbir zaman "bitti" demez. Sayfanın sonu yoktur. Bu sistem, kumarhanelerdeki slot makineleriyle birebir aynı psikolojik mantığa dayanır: Değişken Oranlı Ödül Sistemi.</p>
+            <p>Her ekranı kaydırdığınızda beyniniz "Acaba bu sefer komik, ilginç veya şaşırtıcı bir şey görecek miyim?" beklentisine girer. Gördüğünüz 10 videodan 9'u sıkıcı olsa da, o 1 tane ilginç videoyu bulduğunuzda beyninize küçük bir dopamin (ödül hormonu) salgılanır. Beyin bu ödülü tekrar almak için sizi bir sonraki videoya geçmeye ikna eder. Bu, çıkışı olmayan, duvarları tamamen ayna kaplı bir labirentte yürümeye benzer.</p>
+            <blockquote style="border-left: 4px solid var(--pastel-green); font-style: italic; margin: 35px 0; background: rgba(148, 173, 154, 0.05); padding: 25px; border-radius: 0 20px 20px 0; font-size: 1.2rem; color: var(--black-pure);">
+                "Algoritmalar sizi eğlendirmek için değil, ekran başında tuttuğunuz süre boyunca size reklam gösterebilmek için tasarlanmıştır. Sizin dikkatiniz, onların asıl ürünüdür."
+            </blockquote>
+            <p><strong>Bu tuzağı nasıl bozabiliriz?</strong></p>
+            <p>Öncelikle görünmez duvarlar inşa etmemiz gerekir. "Sadece 15 dakika bakacağım" demek genelde işe yaramaz çünkü dopamin salgılandığında zaman algımız kaybolur. Bunun yerine mekanik sınırlar koyun: Yatmadan bir saat önce telefonunuzun şarj aletini yatak odanızın dışına, örneğin mutfağa kurun. Veya telefonunuzun ekranını "Siyah-Beyaz" (Gri Tonlama) moduna alın. Renklerin kaybolması, beyninizin aldığı görsel ödülü büyük oranda düşürecek ve ekranı kaydırmak birdenbire çok sıkıcı bir eyleme dönüşecektir.</p>
+        `,
+        3: `
+            <div style="margin-bottom: 40px; text-align: center;">
+                <span style="background: rgba(148, 173, 154, 0.15); color: var(--pastel-green); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px;">SADELEŞME</span>
+                <h1 style="font-family: 'Plus Jakarta Sans'; font-size: 2.5rem; color: var(--black-pure); margin-top: 25px; line-height: 1.2;">Hayatınızı Sadeleştirin</h1>
+                <p style="color: var(--pastel-green); font-weight: 600; font-size: 0.95rem;">Dijital Farkındalık Notları</p>
+            </div>
+            <p>Ağzına kadar dolu, her türden ıvır zıvırın birbirine karıştığı bir çekmece düşünün; içinde gerçekten ihtiyacınız olan o kalemi veya pili bulmak neredeyse imkansızdır. Aradığınızı bulsanız bile, o karmaşanın içinde eşelenmek sizi yorar ve sinirlendirir. Aynı şey dijital hayatımız ve günlük rutinlerimiz için de geçerlidir.</p>
+            <p>Dışarıdan bakıldığında her şey yolunda görünse de, yeni bir hobiye başlamak, önemli bir sınava çalışmak veya sadece kendimizle baş başa kalıp dinlenmek istediğimizde odaklanacak enerjiyi bulamayız. Bunun temel nedeni hayatımızdaki "karar yorgunluğu" ve "dijital karmaşa"dır.</p>
+            <p>Her sabah uyandığımızda beynimizin verebileceği karar sayısının bir limiti vardır. Hangi kıyafeti giyeceğimizden tutun da, Netflix'te hangi diziyi izleyeceğimize kadar verdiğimiz her küçük karar, bu enerjiden biraz eksiltir. Dünyanın en başarılı girişimcilerinin veya liderlerinin her gün aynı kıyafetleri giymesi tesadüf değildir. Zihinsel enerjilerini "Ne giysem?" sorusuyla harcamak yerine, dünyayı değiştirecek kararlara saklarlar.</p>
+            <p><strong>Hayatımızı Nasıl Sadeleştirebiliriz?</strong></p>
+            <ul style="line-height: 1.8; margin: 20px 0; padding-left: 20px; color: var(--soft-gray);">
+                <li style="margin-bottom: 10px;"><strong>Dijital Temizlik Yapın:</strong> Son 3 aydır hiç açmadığınız tüm uygulamaları silin. "Belki bir gün lazım olur" düşüncesi en büyük yük kaynağıdır. Lazım olursa 30 saniyede tekrar indirebilirsiniz.</li>
+                <li style="margin-bottom: 10px;"><strong>Abonelikleri İptal Edin:</strong> Size hiçbir değer katmayan, sadece posta kutunuzu dolduran tüm e-bültenlerden ve mağaza bildirimlerinden "Unsubscribe" (Abonelikten çık) butonuna basarak kurtulun.</li>
+                <li style="margin-bottom: 10px;"><strong>Çevrenizi Düzenleyin:</strong> Çalışma masanız, odanız ve telefonunuzun ana ekranı ne kadar düzenli ve boşsa, zihniniz de o kadar berrak olur. Ana ekranınızda sadece her gün kullandığınız 4-5 uygulama kalsın.</li>
+            </ul>
+            <p>Hayatınızı arada bir durdurup sadeleştirmek, fazlalıklardan kurtulmak size sadece zaman değil, aynı zamanda paha biçilemez bir zihinsel huzur kazandıracaktır.</p>
+        `,
+        4: `
+            <div style="margin-bottom: 40px; text-align: center;">
+                <span style="background: rgba(148, 173, 154, 0.15); color: var(--pastel-green); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px;">MOLA SANATI</span>
+                <h1 style="font-family: 'Plus Jakarta Sans'; font-size: 2.5rem; color: var(--black-pure); margin-top: 25px; line-height: 1.2;">Zihinsel Bir "Yeniden Başlat" Neden Gereklidir?</h1>
+                <p style="color: var(--pastel-green); font-weight: 600; font-size: 0.95rem;">Dijital Farkındalık Notları</p>
+            </div>
+            <p>Bazen telefonumuz veya bilgisayarımız tamamen donar. Ekranda görüntü kalır, ancak hiçbir tuş çalışmaz, fare imleci hareket etmez. Sistem aşırı yüklenmiş ve döngüye girmiştir. Böyle anlarda uygulayabileceğimiz tek bir çare vardır: Güç düğmesine uzun süre basılı tutmak, cihazı tamamen kapatıp "Yeniden Başlatmak" (Restart).</p>
+            <p>Zihnimiz de aslında biyolojik bir bilgisayardır ve aşırı bilgiye, strese veya uyarana maruz kaldığında tıpkı donan bir ekran gibi kilitlenir. Gün içinde o kadar çok habere, mesaja, reklama ve beklentiye maruz kalıyoruz ki, beynimiz bunları mantıklı bir çerçevede işleyemez hale geliyor. İşin kötüsü, beynimiz donduğunda mavi ekran vermez; bunun yerine kendini "kaygı", "sürekli yorgunluk" veya "odaklanamama" olarak gösterir.</p>
+            <p>Stres anında beynimizin rasyonel karar veren bölgesi (Prefrontal Korteks) zayıflar ve hayatta kalma güdülerimizi yöneten ilkel bölge (Amigdala) kontrolü ele alır. Bu yüzden kilitlenmiş bir zihinle mantıklı kararlar veremeyiz, ders çalışamayız veya yaratıcı olamayız.</p>
+            <blockquote style="border-left: 4px solid var(--pastel-green); font-style: italic; margin: 35px 0; background: rgba(148, 173, 154, 0.05); padding: 25px; border-radius: 0 20px 20px 0; font-size: 1.2rem; color: var(--black-pure);">
+                "Bazen en verimli, en üretken eylem; hiçbir şey yapmadan durabilme cesaretini göstermektir."
+            </blockquote>
+            <p>Zihniniz kilitlendiğinde, onu daha fazla bilgiyle (örneğin kafa dağıtmak için sosyal medyaya girerek) zorlamak, yanan bir ateşe benzin dökmek gibidir. Ona gerçek bir "yeniden başlatma" fırsatı verin. Teknolojik cihazlardan tamamen uzaklaşın. Kulaklık bile takmadan doğada 15 dakikalık kısa bir yürüyüşe çıkın. Ya da sadece bir pencerenin kenarında oturup dışarıyı izleyin. Canınızın sıkılmasına izin verin; çünkü yaratıcılık ve zihinsel onarım, tam da o can sıkıntısının içinden doğar.</p>
+        `,
+        5: `
+            <div style="margin-bottom: 40px; text-align: center;">
+                <span style="background: rgba(148, 173, 154, 0.15); color: var(--pastel-green); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px;">DİJİTAL SINIRLAR</span>
+                <h1 style="font-family: 'Plus Jakarta Sans'; font-size: 2.5rem; color: var(--black-pure); margin-top: 25px; line-height: 1.2;">Ne Zaman "Dur" Demeliyiz?</h1>
+                <p style="color: var(--pastel-green); font-weight: 600; font-size: 0.95rem;">Dijital Farkındalık Notları</p>
+            </div>
+            <p>Evinizin dış kapısını 24 saat boyunca sonuna kadar açık bırakır mısınız? İçeri giren çıkanın belli olmadığı, yoldan geçen herkesin salonunuzun ortasına girip size bir şeyler söyleyebildiği bir evde huzurla yaşayabilir misiniz? Muhtemelen hayır. Sadece tanıdığınız, sevdiğiniz ve izin verdiğiniz kişilerin içeri girmesine izin verirsiniz. Ancak ilginçtir ki, en mahrem alanımız olan zihnimizin dijital kapıları genellikle herkese ve her şeye tamamen açıktır.</p>
+            <p>Telefonumuz her titreştiğinde, ekranımız her yandığında aslında birinin, bir şirketin veya bir algoritmanın zihnimizin kapısını kırmadan içeri girmesine izin vermiş oluruz. Peki neden bu kapıları kapatamıyoruz? Bunun altında psikolojide "FOMO" (Fear Of Missing Out) yani "Gelişmeleri Kaçırma Korkusu" yatar. Acil bir şey olursa, bir arkadaşım bana ulaşamazsa, dünyadaki son sondakika haberini anında öğrenmezsem diye korkarız.</p>
+            <p>Oysa gerçeklik çok daha basittir: Sosyal medyada dönen haberlerin %99'u sizin anlık müdahalenizi gerektirmez. Ve gerçekten acil bir durum olduğunda, insanlar size WhatsApp'tan mesaj atmaz, sizi direkt ararlar.</p>
+            <p><strong>Sağlıklı Sınırlar Çizmek:</strong></p>
+            <p>Kendi dijital sınırlarınızı inşa etmeye başlayın. Size kimin, ne zaman ulaşabileceğine teknoloji değil, siz karar verin. Telefonunuzda "Rahatsız Etmeyin" (Do Not Disturb) modunu aktif kullanın ve sadece aileniz gibi çok önemli kişilerden gelen aramaların bu modu aşmasına izin verin (VIP liste). Akşam 21:00'den sonra işle ilgili mesajlara veya e-postalara bakmamayı bir prensip haline getirin. Unutmayın; dinlenme saatlerinizde ulaşılmaz olmak dünyadan kopmak değil, aksine kendinize ve hayatınıza saygı duymaktır.</p>
+        `,
+        6: `
+            <div style="margin-bottom: 40px; text-align: center;">
+                <span style="background: rgba(148, 173, 154, 0.15); color: var(--pastel-green); padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px;">ODAKLANMA</span>
+                <h1 style="font-family: 'Plus Jakarta Sans'; font-size: 2.5rem; color: var(--black-pure); margin-top: 25px; line-height: 1.2;">Aynı Anda Birçok İş Yapmak Mümkün Mü?</h1>
+                <p style="color: var(--pastel-green); font-weight: 600; font-size: 0.95rem;">Dijital Farkındalık Notları</p>
+            </div>
+            <p>Günümüz iş ve eğitim dünyasında, aynı anda birden fazla işi yapabilmek (multitasking) sanki ulaşılması gereken en üstün yetenekmiş gibi övülür. İş ilanlarında "aynı anda birçok projeyi yürütebilecek" kişiler aranır. Evde ders çalışırken arka planda dizi izlemek, bir yandan kitap okurken diğer yandan gelen WhatsApp mesajlarına cevap vermek gayet normal karşılanır. Oysa bilim bize çok net bir gerçek söylüyor: İnsan beyni aynı anda iki farklı bilişsel işe tam olarak odaklanabilecek şekilde tasarlanmamıştır.</p>
+            <p>İki işi aynı anda yapmaya çalıştığımızda, beynimiz aslında işleri "aynı anda" yapmaz; sadece ikisi arasında çok hızlı bir şekilde gidip gelir. Kitaptan telefona, telefondan tekrar kitaba... Bu sürekli geçiş yapma (context switching) durumu, zihni olağanüstü derecede yoran bir işlemdir. Her geçişte odaklanmamız kırılır.</p>
+            <p>Araştırmalar, bölünen bir dikkatin eski derinliğine dönmesinin ortalama 20 dakika sürdüğünü gösteriyor. Yani ders çalışırken sadece "2 saniyeliğine" bir bildirime bakmak, aslında sizden 20 dakikalık derin odaklanma süresini çalmış olur. Sonucunda ise hem çok yoruluruz hem de yaptığımız işlerin kalitesi yerlerde sürünür.</p>
+            <blockquote style="border-left: 4px solid var(--pastel-green); font-style: italic; margin: 35px 0; background: rgba(148, 173, 154, 0.05); padding: 25px; border-radius: 0 20px 20px 0; font-size: 1.2rem; color: var(--black-pure);">
+                "Aynı anda iki tavşanı kovalayan, ikisini de yakalayamaz."
+            </blockquote>
+            <p>Gerçek başarı, derin öğrenme ve zihinsel huzur; anı yaşamaktan ve tek bir şeye tam anlamıyla (single-tasking) odaklanmaktan geçer. Bir işi yaparken, masanızdaki telefonu görüş alanınızın dışına çıkarın. Sadece 25 dakika boyunca (Pomodoro tekniği) tek bir göreve tam dikkatinizi verin. Göreceksiniz ki, saatlerce yayılan o yorucu mesailer kısalacak, işleriniz çok daha hızlı ve hatasız bitecektir.</p>
+        `
+    };
+
+    let activeTab = 'home';
+
+    /* --- OYUN KARTLARI VERİSİ (YENİ VE DETAYLI) --- */
+    const cardData = [
+        { 
+            id: 1, 
+            icon: "🧠", 
+            title: "Zihin Detoksu", 
+            text: "Sürekli bildirim almak, beynimizde kesintiye uğramış bir çalışma döngüsü yaratarak ciddi bir zihinsel yorgunluğa sebep olur. Araştırmalar, gereksiz bildirimleri kapatmanın odak gücünü %40 oranında artırdığını gösteriyor. Hayatınızda acil olmayan tüm uygulamaların bildirim seslerini kapatarak, dikkatinizin kontrolünü algoritmalardan geri alabilirsiniz." 
+        },
+        { 
+            id: 2, 
+            icon: "🔌", 
+            title: "Bağlantıyı Kes", 
+            text: "Ekranlardan yayılan mavi ışık, beynimize 'hala gündüz' mesajı vererek uyku hormonu olan melatoninin salgılanmasını engeller. Uykudan en az 1 saat önce tüm dijital ekranlarla bağınızı kesmek, biyolojik saatinizin (sirkadiyen ritim) doğal akışına dönmesini ve zihinsel donanımınızın gece boyunca tam anlamıyla yenilenmesini sağlar." 
+        },
+        { 
+            id: 3, 
+            icon: "🚀", 
+            title: "Yüksek Verim", 
+            text: "Çoğu insan dijital detoksu bir tür 'kısıtlama' veya 'teknolojiden mahrum kalma' olarak algılar. Oysa dijital farkındalık, teknolojiyi hayatınızın merkezinden çıkarıp, sizin için çalışan bir araca dönüştürme sanatıdır. Bu sayede zamanınızı ve enerjinizi çok daha kaliteli ve verimli bir şekilde optimize edersiniz." 
+        },
+        { 
+            id: 4, 
+            icon: "🗑️", 
+            title: "Dijital Atık", 
+            text: "Telefonunuzdaki her bir uygulama, her bir ikon zihninizde potansiyel bir görev veya açık kalmış bir sekme olarak yer işgal eder. Son 3 aydır hiç kullanmadığınız uygulamaları ve gereksiz dosyaları silmek, sadece cihazınızın hafızasını değil, zihninizdeki 'ne yapmalıyım' karmaşasını da temizleyerek karar yorgunluğunu azaltır." 
+        },
+        { 
+            id: 5, 
+            icon: "🌙", 
+            title: "Gece Modu", 
+            text: "Eğer akşam saatlerinde mutlaka çalışmanız veya ekran başında olmanız gerekiyorsa, cihazınızın 'Gece Modu' (Mavi Işık Filtresi) özelliğini mutlaka aktif edin. Bu filtre, ekranın renk sıcaklığını daha sıcak tonlara (sarı/kırmızı) çekerek beyninizin uykuya geçiş sürecini %30 hızlandırır ve göz yorgunluğunu ciddi oranda düşürür." 
+        },
+        { 
+            id: 6, 
+            icon: "🚫", 
+            title: "Sonsuz Kaydırma", 
+            text: "Sosyal medya platformlarındaki 'Sonsuz Kaydırma' (Infinite Scroll) özelliği, beyninizdeki dopamin reseptörlerini hacklemek ve sizi ekranda daha uzun süre tutmak için tasarlanmıştır. Bu algoritmaların sizin eğlenmeniz için değil, dikkatinizi satmak için çalıştığını fark etmek, dijital iradenizi ve özgürlüğünüzü geri kazanmanın en önemli adımıdır." 
+        }
+    ];
+
+    let gameCards = [];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+
+    /* --- SES (WEB AUDIO API) --- */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playZenSound(frequency = 432, duration = 2, type = 'sine', volume = 0.5) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        
+        gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+        // Sesi yavaşça söndürerek gerçek bir çan (bell) hissi yaratır
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration);
+    }
+
+    /* --- CHART.JS GRAFİĞİ --- */
+    let loadChart;
+    
+    function initChart() {
+        const ctx = document.getElementById('loadChart');
+        if(!ctx) return;
+        
+        loadChart = new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Ekran Yorgunluğu', 'Bildirim Stresi', 'Uyku Eksikliği'],
+                datasets: [{
+                    data: [30, 30, 40],
+                    backgroundColor: ['#4a5568', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: 'var(--soft-gray)', font: {family: 'Inter'} } }
+                }
+            }
+        });
+    }
+
+    function updateChartData(screen, notif, sleep) {
+        if(!loadChart) return;
+        // Matematiksel ağırlıkları grafiğe yansıt
+        const screenWeight = (screen / 14) * 100;
+        const notifWeight = notif;
+        const sleepDeficit = 100 - sleep; // Uyku azsa yorgunluk çoktur
+        
+        loadChart.data.datasets[0].data = [screenWeight, notifWeight, sleepDeficit];
+        loadChart.update();
+    }
+
+    /* --- POMODORO VE LOCAL STORAGE DEĞİŞKENLERİ --- */
+    let timerInterval;
+    let selectedDuration = 25; 
+    let timeLeft = selectedDuration * 60; 
+    let isTimerRunning = false;
+    let totalFocusTime = parseInt(localStorage.getItem('totalFocusTime')) || 0;
+
+    /* --- SAYFA YÖNETİMİ (SPA & ANİMASYON) --- */
+    function showPage(pageId) {
+        activeTab = pageId;
+        
+        document.querySelectorAll('.page-content').forEach(p => {
+            p.classList.remove('active');
+            p.style.animation = 'none'; 
+            p.offsetHeight; 
+            p.style.animation = null; 
+        });
+        
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        
+        const targetPage = document.getElementById(pageId);
+        if(targetPage) {
+            targetPage.classList.add('active');
+        }
+        
+        const targetLink = document.getElementById('link-' + pageId);
+        if(targetLink) {
+            targetLink.classList.add('active');
+        }
+        
+        if(pageId === 'home') startCounters();
+        if(pageId === 'education' && document.getElementById('game-grid').innerHTML === '') setupGame(); 
+        if(pageId === 'analysis') { calculateLoad(); if(!loadChart) setTimeout(initChart, 100); } 
+        if(pageId === 'detox') updateStatsBoard();
+    }
+
+    /* --- OYUN FONKSİYONLARI --- */
+    function setupGame() {
+        const grid = document.getElementById('game-grid');
+        grid.innerHTML = ''; 
+        firstCard = secondCard = null; lockBoard = false;
+        
+        gameCards = [...cardData, ...cardData].sort(() => Math.random() - 0.5);
+        
+        gameCards.forEach((data, index) => {
+            grid.innerHTML += `
+                <div class="step-card" data-id="${data.id}" onclick="flipGameCard(this)">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="game-question-mark">?</div>
+                            <div class="step-num">KART ${String(index+1).padStart(2,'0')}</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="card-icon">${data.icon}</div>
+                            <h3>${data.title}</h3>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function flipGameCard(card) {
+        if (lockBoard || card === firstCard) return; 
+        card.classList.add('flipped');
+        
+        if (!firstCard) { 
+            firstCard = card; 
+            return; 
+        }
+        
+        secondCard = card;
+        
+        if (firstCard.dataset.id === secondCard.dataset.id) {
+            disableCards();
+        } else {
+            unflipCards();
+        }
+    }
+
+    function disableCards() {
+        firstCard.classList.add('matched'); 
+        secondCard.classList.add('matched');
+        
+        const matchedData = cardData.find(d => d.id == firstCard.dataset.id);
+        
+        // Eşleşme sesi (Pozitif)
+        playZenSound(600, 1.5, 'triangle', 0.1);
+
+        setTimeout(() => openGameModal(matchedData), 500); 
+        resetBoard();
+    }
+
+    function unflipCards() {
+        lockBoard = true; 
+        setTimeout(() => { 
+            firstCard.classList.remove('flipped'); 
+            secondCard.classList.remove('flipped'); 
+            resetBoard(); 
+        }, 1000); 
+    }
+    
+    function resetBoard() { 
+        firstCard = null;
+        secondCard = null;
+        lockBoard = false; 
+    }
+    
+    function openGameModal(data) {
+        document.getElementById('modal-icon').innerText = data.icon;
+        document.getElementById('modal-title').innerText = data.title;
+        document.getElementById('modal-text').innerText = data.text;
+        document.getElementById('game-info-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; 
+    }
+    
+    function closeGameModal() { 
+        document.getElementById('game-info-modal').style.display = 'none'; 
+        document.body.style.overflow = 'auto'; 
+    }
+
+    /* --- MAKALE OKUYUCU --- */
+    function openReader(id) { 
+        document.getElementById('reader-inner').innerHTML = makaleler[id]; 
+        document.getElementById('reader').style.display = 'block'; 
+        document.body.style.overflow = 'hidden'; 
+    }
+    
+    function closeReader() { 
+        document.getElementById('reader').style.display = 'none'; 
+        document.body.style.overflow = 'auto'; 
+    }
+
+    /* --- ANA SAYFA SAYAÇLARI --- */
+    function startCounters() {
+        document.querySelectorAll('.stat-count').forEach(stat => {
+            const target = +stat.getAttribute('data-target');
+            let count = 0;
+            const inc = target / 100;
+            const update = () => { 
+                if(count < target) { 
+                    count += inc; 
+                    stat.innerText = Math.ceil(count).toLocaleString() + "+"; 
+                    setTimeout(update, 10); 
+                } 
+                else { 
+                    stat.innerText = target.toLocaleString() + "+"; 
+                }
+            };
+            update();
+        });
+    }
+
+    /* --- TEMA YÖNETİMİ --- */
+    function toggleDarkMode() { 
+        document.body.classList.toggle('dark-mode'); 
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            if(loadChart) { loadChart.options.plugins.legend.labels.color = '#e2e8f0'; loadChart.update(); }
+        } else {
+            localStorage.setItem('theme', 'light');
+            if(loadChart) { loadChart.options.plugins.legend.labels.color = '#4a5568'; loadChart.update(); }
+        }
+    }
+
+    /* --- ZİHİNSEL YÜK ANALİZİ VE GRAFİK GÜNCELLEMESİ --- */
+    function calculateLoad() {
+        const sTime = document.getElementById('input-screen').value;
+        const nLevel = document.getElementById('input-notif').value;
+        const slLevel = document.getElementById('input-sleep').value; 
+        
+        document.getElementById('val-screen').innerText = sTime + " Saat";
+        
+        let notifText = "Düşük";
+        if(nLevel > 33) notifText = "Orta";
+        if(nLevel > 66) notifText = "Yüksek";
+        document.getElementById('val-notif').innerText = notifText;
+
+        let sleepText = "Kötü";
+        if(slLevel > 33) sleepText = "Normal";
+        if(slLevel > 66) sleepText = "İyi";
+        document.getElementById('val-sleep').innerText = sleepText;
+
+        let load = Math.round((sTime * 4) + (nLevel * 0.4) - (slLevel * 0.3));
+        
+        if(load < 10) load = 10;
+        if(load > 100) load = 100;
+
+        document.getElementById('final-load-val').innerText = load + "%";
+        
+        const bar = document.getElementById('final-analysis-fill');
+        const txt = document.getElementById('final-load-text');
+        const valTxt = document.getElementById('final-load-val');
+        
+        bar.style.width = load + "%";
+
+        if(load < 40) { 
+            bar.style.background = "#4CAF50"; 
+            valTxt.style.color = "#4CAF50"; 
+            txt.innerText = "Sisteminiz sağlıklı çalışıyor. Harika bir dijital denge kurmuşsunuz."; 
+        } 
+        else if (load < 75) { 
+            bar.style.background = "#f59e0b"; 
+            valTxt.style.color = "#f59e0b"; 
+            txt.innerText = "Sistemde hafif yorulmalar var. Uyku kalitenizi artırmayı deneyin."; 
+        } 
+        else { 
+            bar.style.background = "#ef4444"; 
+            valTxt.style.color = "#ef4444"; 
+            txt.innerText = "KRİTİK UYARI: Sistem aşırı yüklü! Ekran detoksu yapmalısınız."; 
+        }
+
+        // Grafiği Güncelle
+        updateChartData(sTime, nLevel, slLevel);
+    }
+
+    /* --- API ENTEGRELİ FORM DOĞRULAMA --- */
+    document.getElementById('betaForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+        
+        const name = document.getElementById('userName').value.trim();
+        const email = document.getElementById('userEmail').value.trim();
+        const msg = document.getElementById('userMsg').value.trim();
+        const submitBtn = document.getElementById('submitBtnForm');
+        
+        if(name.length < 3) { 
+            document.getElementById('err-name').style.display = 'block'; 
+            isValid = false; 
+        } else { 
+            document.getElementById('err-name').style.display = 'none'; 
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailRegex.test(email)) { 
+            document.getElementById('err-email').style.display = 'block'; 
+            isValid = false; 
+        } else { 
+            document.getElementById('err-email').style.display = 'none'; 
+        }
+        
+        if(msg.length > 0 && msg.length < 10) { 
+            document.getElementById('err-msg').style.display = 'block'; 
+            isValid = false; 
+        } else { 
+            document.getElementById('err-msg').style.display = 'none'; 
+        }
+
+        if(isValid) {
+            submitBtn.innerText = "GÖNDERİLİYOR...";
+            
+            fetch("https://formspree.io/f/mojrjbkk", {
+                method: "POST", 
+                headers: { 
+                    'Accept': 'application/json', 
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify({ 
+                    Ad_Soyad: name, 
+                    Email: email, 
+                    Kullanici_Mesaji: msg 
+                })
+            })
+            .then(response => {
+                if (response.ok) { 
+                    document.getElementById('betaForm').style.display = 'none'; 
+                    document.getElementById('success-msg').style.display = 'block'; 
+                    playZenSound(800, 1.5, 'sine', 0.2); // Başarı sesi
+                } 
+                else { 
+                    alert("Sunucu hatası oluştu. Lütfen tekrar deneyin."); 
+                    submitBtn.innerText = "KAYIT OL"; 
+                }
+            })
+            .catch(error => { 
+                alert("Ağ bağlantısı hatası! İnternet bağlantınızı kontrol edin."); 
+                submitBtn.innerText = "KAYIT OL"; 
+            });
+        }
+    });
+
+    /* --- GELİŞMİŞ DETOKS (POMODORO) MANTIĞI --- */
+    function setTimerDuration(mins, btnElement) {
+        if(isTimerRunning) return; 
+        
+        selectedDuration = mins;
+        timeLeft = mins * 60;
+        updateTimerDisplay();
+        
+        document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+
+    function updateTimerDisplay() {
+        let m = Math.floor(timeLeft / 60);
+        let s = timeLeft % 60;
+        document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function toggleTimer() {
+        const btn = document.getElementById('timer-start-btn');
+        const ring = document.getElementById('timer-ring');
+        const setupDiv = document.getElementById('detox-setup');
+        const taskDisplay = document.getElementById('active-task-display');
+        const taskInput = document.getElementById('focus-task').value;
+        
+        if(isTimerRunning) {
+            clearInterval(timerInterval);
+            btn.innerText = "DEVAM ET";
+            btn.style.background = "var(--pastel-green)";
+            ring.classList.remove('running');
+        } else {
+            setupDiv.style.display = 'none';
+            taskDisplay.style.display = 'block';
+            taskDisplay.innerText = taskInput ? "Hedef: " + taskInput : "Derin Odaklanma Modu";
+            
+            // Başlangıç sesi
+            playZenSound(432, 2, 'sine', 0.3);
+
+            timerInterval = setInterval(() => {
+                if(timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    totalFocusTime += selectedDuration;
+                    localStorage.setItem('totalFocusTime', totalFocusTime);
+                    updateStatsBoard();
+                    
+                    // Bitiş (Zafer) Sesi
+                    playZenSound(528, 4, 'sine', 0.5);
+                    
+                    alert("Tebrikler! Odaklanma seansınızı başarıyla tamamladınız.");
+                    resetTimer();
+                }
+            }, 1000);
+            
+            btn.innerText = "DURAKLAT";
+            btn.style.background = "#ef4444";
+            ring.classList.add('running');
+        }
+        isTimerRunning = !isTimerRunning;
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        timeLeft = selectedDuration * 60;
+        updateTimerDisplay();
+        
+        const btn = document.getElementById('timer-start-btn');
+        btn.innerText = "BAŞLAT";
+        btn.style.background = "var(--pastel-green)";
+        
+        document.getElementById('timer-ring').classList.remove('running');
+        document.getElementById('detox-setup').style.display = 'block';
+        document.getElementById('active-task-display').style.display = 'none';
+    }
+    
+    function updateStatsBoard() {
+        document.getElementById('total-focus-stats').innerText = totalFocusTime;
+    }
+
+    /* --- KRİZ MODU (NEFES EGZERSİZİ VE SESLER) --- */
+    let crisisInterval;
+    let breathTimeout1;
+    let breathTimeout2;
+    let breathCycleCount = 1;
+
+    function openCrisisMode() {
+        document.getElementById('crisis-overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        breathCycleCount = 1;
+        document.getElementById('cycle-counter').innerText = "DÖNGÜ: " + breathCycleCount;
+        document.getElementById('btn-feel-better').style.display = 'block';
+        document.getElementById('crisis-success-msg').style.display = 'none';
+        
+        const circle = document.getElementById('breath-circle');
+        circle.style.display = 'flex';
+        circle.style.transform = "scale(1)";
+        circle.style.transition = "none";
+        
+        runBreathingCycle();
+        
+        crisisInterval = setInterval(() => {
+            breathCycleCount++;
+            document.getElementById('cycle-counter').innerText = "DÖNGÜ: " + breathCycleCount;
+            runBreathingCycle();
+        }, 19000); 
+    }
+
+    function runBreathingCycle() {
+        const circle = document.getElementById('breath-circle');
+        
+        // NEFES AL
+        circle.innerText = "Nefes Al (4s)";
+        circle.style.transition = "transform 4s ease-in-out, background 4s ease";
+        circle.style.transform = "scale(1.8)";
+        circle.style.background = "var(--pastel-green)";
+        circle.style.color = "white";
+        circle.style.border = "4px solid var(--pastel-green)";
+        
+        playZenSound(200, 4, 'sine', 0.1); // İnce rahatlatıcı ses
+
+        breathTimeout1 = setTimeout(() => {
+            // NEFES TUT
+            circle.innerText = "Nefes Tut (7s)";
+            circle.style.transition = "none"; 
+            circle.style.background = "#f59e0b"; 
+            circle.style.border = "4px solid #f59e0b";
+            
+            breathTimeout2 = setTimeout(() => {
+                // NEFES VER
+                circle.innerText = "Nefes Ver (8s)";
+                circle.style.transition = "transform 8s ease-in-out, background 8s ease";
+                circle.style.transform = "scale(1)";
+                circle.style.background = "rgba(148, 173, 154, 0.2)";
+                circle.style.color = "var(--black-pure)";
+                circle.style.border = "4px solid var(--pastel-green)";
+                
+                playZenSound(150, 8, 'sine', 0.1); // Daha derinden gelen boşalma sesi
+            }, 7000);
+            
+        }, 4000);
+    }
+
+    function finishCrisisMode() {
+        clearInterval(crisisInterval);
+        clearTimeout(breathTimeout1);
+        clearTimeout(breathTimeout2);
+        
+        const circle = document.getElementById('breath-circle');
+        
+        circle.style.transition = "0.5s ease";
+        circle.style.transform = "scale(0)"; 
+        
+        playZenSound(528, 3, 'triangle', 0.2); // Zihni toplama başarılı sesi
+
+        setTimeout(() => {
+            circle.style.display = 'none';
+            document.getElementById('btn-feel-better').style.display = 'none';
+            document.getElementById('cycle-counter').innerText = "";
+            
+            document.getElementById('crisis-success-msg').style.display = 'block';
+            
+            setTimeout(() => {
+                closeCrisisMode();
+            }, 2500); 
+            
+        }, 500);
+    }
+
+    function closeCrisisMode() {
+        document.getElementById('crisis-overlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        clearInterval(crisisInterval);
+        clearTimeout(breathTimeout1);
+        clearTimeout(breathTimeout2);
+    }
+
+    /* --- BAŞA DÖN BUTONU --- */
+    window.onscroll = function() {
+        let scrollBtn = document.getElementById("scrollTopBtn");
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) { 
+            scrollBtn.style.display = "block"; 
+        } else { 
+            scrollBtn.style.display = "none"; 
+        }
+    };
+    
+    function scrollToTop() { 
+        window.scrollTo({top: 0, behavior: 'smooth'}); 
+    }
+
+    /* --- SAYFA YÜKLENİRKEN --- */
+    window.onload = () => {
+        if(localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+        
+        startCounters();
+        calculateLoad(); 
+        updateTimerDisplay();
+        updateStatsBoard(); 
+        
+        setInterval(() => {
+            const q = document.getElementById('dynamic-quote');
+            if(q && activeTab === 'home') {
+                q.style.opacity = 0;
+                setTimeout(() => {
+                    const sozler = [
+                        {t:"Zihin, <span>sessizlikte</span> kendi sesini duyar."}, 
+                        {t:"Fişi çek, <span>gerçek dünyaya</span> bağlan."},
+                        {t:"Odaklanma, <span>hayır diyebilme</span> sanatıdır."}
+                    ];
+                    q.innerHTML = sozler[Math.floor(Math.random() * sozler.length)].t;
+                    q.style.opacity = 1;
+                }, 800);
+            }
+        }, 7000);
+        
+        // Grafiği Yükle (Tarayıcı gecikmesini önlemek için küçük bir süre sonra)
+        setTimeout(() => {
+            if(activeTab === 'analysis') {
+                initChart();
+                calculateLoad();
+            }
+        }, 500);
+    };
+</script>
+</body>
+</html>
